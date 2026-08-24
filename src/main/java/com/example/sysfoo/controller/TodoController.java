@@ -2,28 +2,32 @@ package com.example.sysfoo.controller;
 
 import com.example.sysfoo.model.Todo;
 import com.example.sysfoo.service.TodoService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/todos")
+@Path("/todos")
 public class TodoController {
 
-    @Autowired
-    private TodoService todoService;
+    @Inject
+    TodoService todoService;
 
-    @PostMapping
-    public ResponseEntity<Todo> addTodo(@RequestBody Todo todo) {
-        Todo savedTodo = todoService.save(todo);
-        return ResponseEntity.ok(savedTodo);
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Todo addTodo(Todo todo) {
+        return todoService.save(todo);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Todo>> getAllTodos() {
-        List<Todo> todos = todoService.findAll();
-        return ResponseEntity.ok(todos);
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Todo> getAllTodos() {
+        return todoService.findAll();
     }
 }

@@ -1,7 +1,9 @@
 package com.example.sysfoo.repository;
 
 import com.example.sysfoo.model.Todo;
-import org.springframework.data.jpa.repository.JpaRepository;
+import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import jakarta.enterprise.context.ApplicationScoped;
 
-public interface TodoRepository extends JpaRepository<Todo, Long> {
+@ApplicationScoped
+public class TodoRepository implements PanacheRepository<Todo> {
 }

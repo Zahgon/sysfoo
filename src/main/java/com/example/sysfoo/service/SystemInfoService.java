@@ -2,27 +2,26 @@ package com.example.sysfoo.service;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Map;
 
-@Service
+import javax.sql.DataSource;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+@ApplicationScoped
 public class SystemInfoService {
 
-    @Value("${app.version}")
-    private String appVersion;
+    @ConfigProperty(name = "app.version")
+    String appVersion;
 
-    @Autowired
-    private DataSource dataSource;
+    @Inject
+    DataSource dataSource;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    
     public String getHostname() throws UnknownHostException {
         return InetAddress.getLocalHost().getHostName();
     }
@@ -44,10 +43,13 @@ public class SystemInfoService {
     }
 
     public Map<String, String> getDatabaseInfo() {
-        try {
+        try (Connection connection = dataSource.getConnection()) {
             // This executes a simple query to check the connection
-            jdbcTemplate.queryForObject("SELECT 1", Integer.class);
-            String databaseProductName = dataSource.getConnection().getMetaData().getDatabaseProductName();
+            try (Statement statement = connection.createStatement();
+                 ResultSet resultSet = statement.executeQuery("SELECT 1")) {
+                resultSet.next();
+            }
+            String databaseProductName = connection.getMetaData().getDatabaseProductName();
             return Map.of(
                 "status", "Connected",
                 "databaseType", databaseProductName

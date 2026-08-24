@@ -2,22 +2,29 @@ package com.example.sysfoo.service;
 
 import com.example.sysfoo.model.Todo;
 import com.example.sysfoo.repository.TodoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 
-@Service
+@ApplicationScoped
 public class TodoService {
 
-    @Autowired
-    private TodoRepository todoRepository;
+    @Inject
+    TodoRepository todoRepository;
 
+    @Transactional
     public Todo save(Todo todo) {
-        return todoRepository.save(todo);
+        // Replicate Spring Data save() upsert: persist() is insert-only, so merge when id is present.
+        if (todo.getId() == null) {
+            todoRepository.persist(todo);
+            return todo;
+        }
+        return todoRepository.getEntityManager().merge(todo);
     }
 
     public List<Todo> findAll() {
-        return todoRepository.findAll();
+        return todoRepository.listAll();
     }
 }

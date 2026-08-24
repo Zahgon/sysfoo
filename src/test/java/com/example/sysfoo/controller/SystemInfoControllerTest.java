@@ -1,35 +1,27 @@
 package com.example.sysfoo.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
 import com.example.sysfoo.service.SystemInfoService;
-import org.junit.jupiter.api.BeforeEach;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(SystemInfoController.class)
+@QuarkusTest
 public class SystemInfoControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
-    private SystemInfoService systemInfoService;
+    @InjectMock
+    SystemInfoService systemInfoService;
 
     @Test
-    public void getVersionTest() throws Exception {
+    public void getVersionTest() {
         when(systemInfoService.getAppVersion()).thenReturn("1.0.0");
-        mockMvc.perform(get("/version"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("1.0.0"));
+        given()
+                .when().get("/version")
+                .then()
+                .statusCode(200)
+                .body(is("1.0.0"));
     }
 }

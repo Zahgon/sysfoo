@@ -1,26 +1,29 @@
 package com.example.sysfoo.controller;
 
 import com.example.sysfoo.service.SystemInfoService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestController
+@Path("/")
 public class SystemInfoController {
 
-    @Autowired
-    private SystemInfoService systemInfoService;
+    @Inject
+    SystemInfoService systemInfoService;
 
-    @Value("${app.version}")
-    private String appVersion; // Make sure this property is defined in your application.properties
+    @ConfigProperty(name = "app.version")
+    String appVersion; // Make sure this property is defined in application.properties
 
-
-    @GetMapping("/system-info")
+    @GET
+    @Path("/system-info")
+    @Produces(MediaType.APPLICATION_JSON)
     public Map<String, Object> getSystemInfo() throws UnknownHostException {
         Map<String, Object> info = new HashMap<>();
         info.put("Hostname", systemInfoService.getHostname());
@@ -31,12 +34,16 @@ public class SystemInfoController {
         return info;
     }
 
-    @GetMapping("/version")
-    public ResponseEntity<String> getVersion() {
-        return ResponseEntity.ok(appVersion); // Returns the app version
+    @GET
+    @Path("/version")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getVersion() {
+        return appVersion; // Returns the app version
     }
 
-    @GetMapping("/database-info")
+    @GET
+    @Path("/database-info")
+    @Produces(MediaType.APPLICATION_JSON)
     public Map<String, String> getDatabaseInfo() {
         return systemInfoService.getDatabaseInfo();
     }
